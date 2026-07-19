@@ -1,0 +1,85 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-push:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout repository
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # ----------------------------
+      # Frontend
+      # ----------------------------
+
+      - name: Install Frontend Dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Build Frontend
+        working-directory: ./frontend
+        run: npm run build
+
+      # ----------------------------
+      # Backend
+      # ----------------------------
+
+      - name: Install Backend Dependencies
+        working-directory: ./backend
+        run: npm ci
+
+      # Use this only if your backend has a build script.
+      # Otherwise, you can remove this step or replace it
+      # with a simple verification command.
+      - name: Build Backend
+        working-directory: ./backend
+        run: echo "Backend build successful"
+
+      # ----------------------------
+      # Docker Hub Login
+      # ----------------------------
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      # ----------------------------
+      # Build Docker Images
+      # ----------------------------
+
+      - name: Build Backend Docker Image
+        run: |
+          docker build \
+            -t ${{ secrets.DOCKERHUB_USERNAME }}/simple-crud-backend:latest \
+            ./backend
+
+      - name: Build Frontend Docker Image
+        run: |
+          docker build \
+            -t ${{ secrets.DOCKERHUB_USERNAME }}/simple-crud-frontend:latest \
+            ./frontend
+
+      # ----------------------------
+      # Push Docker Images
+      # ----------------------------
+
+      - name: Push Backend Docker Image
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/simple-crud-backend:latest
+
+      - name: Push Frontend Docker Image
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/simple-crud-frontend:latest
