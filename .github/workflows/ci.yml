@@ -7,19 +7,18 @@ on:
 
 jobs:
   build-and-push:
-
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout repository
+      # Checkout the repository
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # Setup Node.js
-     - name: Setup Node.js
-       uses: actions/setup-node@v5
-       with:
-         node-version: 16
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 16
 
       # ----------------------------
       # Frontend
@@ -41,15 +40,13 @@ jobs:
         working-directory: ./backend
         run: npm ci
 
-      # Use this only if your backend has a build script.
-      # Otherwise, you can remove this step or replace it
-      # with a simple verification command.
-      - name: Build Backend
+      # Replace this with "npm run build" if your backend has a build script
+      - name: Verify Backend
         working-directory: ./backend
         run: echo "Backend build successful"
 
       # ----------------------------
-      # Docker Hub Login
+      # Login to Docker Hub
       # ----------------------------
 
       - name: Login to Docker Hub
